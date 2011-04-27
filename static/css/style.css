@@ -1,0 +1,98 @@
+@font-face {
+    font-family: 'Pacifico';
+    src: url('/font/Pacifico-webfont.eot');
+    src: url('/font/Pacifico-webfont.eot?#iefix') format('embedded-opentype'),
+         url('/font/Pacifico-webfont.woff') format('woff'),
+         url('/font/Pacifico-webfont.ttf') format('truetype'),
+         url('/font/Pacifico-webfont.svg#PacificoRegular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+/* Generic Stuff */
+p {
+	padding:8px 0;
+	}
+html, body {
+	padding:0;
+	margin:0;
+	height:100%;
+	color:#444;
+	}
+	body {
+		font-size:1.0em;
+		font-family: Helvetica;
+		background-image: -webkit-gradient(
+			linear,
+			left bottom,
+			left top,
+			from(rgb(5,131,138)),
+			to(rgb(27,182,192))
+		);
+		background-image: -moz-linear-gradient(
+			center bottom,
+			rgb(5,131,138) 0%,
+			rgb(27,182,192) 100%
+		);
+		}
+		div#header, ul#menu, div.content, div#footer {
+			width:700px;
+			margin:auto;
+			display:block;
+			padding:10px;
+			}
+		div#header {
+			text-align:center;
+			height:150px;
+			}
+			div#header span#title {
+				font-size:5.0em;
+				font-family:'Pacifico';
+				color:#fff;
+				text-shadow:5px 5px 5px rgba(0,0,0,0.4);
+				}
+		ul#menu {
+			margin-bottom:-1px;
+			}
+		ul#menu li {
+			display:inline;
+			}
+			ul#menu li a {
+				color:#fff;
+				text-decoration:none;
+				padding:10px;
+				border-top-left-radius:3px;
+				border-top-right-radius:3px;
+				}
+			ul#menu li a.selected, ul#menu li a:hover {
+				background:#fff;
+				color:#000;
+				}
+		div#container {
+			background:#fff;
+			padding:15px;
+			}
+			textarea, div#preview {
+				width:100%;
+				min-height:300px;
+				}
+			textarea, input {
+				padding:5px;
+				border:solid 1px rgba(0,0,0,0.4);
+				}
+			div#preview {
+				display:none;
+				}
+			p.question {
+				font-weight:bold;
+				}
+		div#footer span#copyright {
+			color:#fff;
+			}
+		div#footer span#copyright a {
+			color:#fff;
+			}
+		div#footer span#copyright a:hover {
+			text-decoration:none;
+			}

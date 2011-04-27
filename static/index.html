@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Embedify</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<link type="text/css" rel="stylesheet" href="/css/style.css">
+	</head>
+	<body>
+		<div id="header">
+			<span id="title">Embedify</span>
+		</div>
+		<ul id="menu">
+			<li><a href="#about">About</a></li>
+			<li><a href="#faq">FAQ</a></li>
+			<li><a href="#api">API</a></li>
+		</ul>
+		<div id="container">
+			<div class="content" id="about">
+				<p>Embedify is a simple tool which converts URLs in a body of text to a relevant embedded format.</p>
+				<p>Try it out below. Just add some text and click convert.</p>
+				<textarea id="text"></textarea>
+				<div id="preview"></div>
+				<input type="button" id="testrun" value="Convert" />
+				<input type="button" id="preview" value="Preview" />
+			</div>
+			<div class="content" id="faq">
+				<h1>FAQ</h1>
+				<p class="question">Does embedify filter out malicious code?</p>
+				<p>Yes, Embedify filters out all &lt;script /&gt; and &lt;object /&gt; elements along with the javascript: protocol in href attributes and all current on* event attributes.</p>
+				
+				<p class="question">What URL formats does embedify convert?</p>
+				<ul>
+					<li>Video Services
+						<ul>
+							<li>YouTube</li>
+							<li>Vimeo</li>
+							<li>Google Video</li>
+							<li>Facebook</li>
+							<li>MySpace</li>
+							<li>MegaVideo</li>
+							<li>DailyMotion</li>
+						</ul>
+					</li>
+					<li><a href="http://magiccards.info">magiccards.info</a> card pages.</li>
+					<li>Images
+						<ul>
+							<li>JPG</li>
+							<li>JPEG</li>
+							<li>GIF</li>
+							<li>PNG</li>
+						</ul>
+					</li>
+					<li>HTML5 videos
+						<ul>
+							<li>MP4</li>
+							<li>OGG</li>
+							<li>WEBM</li>
+						</ul>
+					</li>
+					<li>Google Maps URLs</li>
+					<li>PDF documents</li>
+					<li>PPT presentations</li>
+					<li>Plain old URLs get linkified</li>
+				</ul>
+				
+				<p class="question">What else does it do?</p>
+				<p>All &lt;a /&gt; link elements get target=&quot;_blank&quot; added to them.</p>
+				
+				<p class="question">Can I selectively choose which filters to use?</p>
+				<p>Not yet, but that is planned. You will be able to select whole branches like "Video Services" or be more selective like only use "YouTube" and "Vimeo" filters.</p>
+				
+				<p class="question">Why doesn't it filter URLs from XYZ website?</p>
+				<p>Probably because I didn't think of it. If you find something you want a filter for, send me a message me on <a href="http://twitter.com/cyruzdraxs">Twitter</a> or send me an <a href="mailto:cyruzdraxs@gmail.com">email</a> and I can probably put something together for it fairly easily.</p>
+				
+				<p class="question">Can I just make a filter myself?</p>
+				<p>I don't have a way for anyone to add their own filters and probably won't in the future. But if you write one you can email it to me. They look kind of like this;</p>
+				<code>function(str){ return str.replace(/<\s*script[^>]*>[\s\S]*?<\/script>/mig,''); }</code>
+			</div>
+			<div class="content" id="api">
+				<h1>API Docs</h1>
+				<p>Using Embedify is pretty simple really. Just POST your text to http://<span class="hostname">embedify.duostack.net</span>/convert in the "text" variable.</p>
+				<p>I plan to add the ability to select which filters to use at some point in the future, but I haven't decided yet how I want to implement that.</p>
+			</div>
+		</div>
+		<div id="footer">
+			<span id="copyright">&copy;2011 <a href="http://stephenbelanger.com">Stephen Belanger</a></span>
+		</div>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.1/jquery.min.js" type="text/javascript"></script>
+		<script type="text/javascript">
+		$(document).ready(function(){
+			// Do the menu stuff.
+			$('ul#menu a').click(function(){
+				var id = $(this).attr('href');
+				window.location.hash = id;
+				$('ul#menu a').removeClass('selected');
+				$(this).addClass('selected');
+				$('div.content').hide();
+				$('div#container > div'+id).show();
+				return false;
+			});
+			
+			// Hide all content before trying
+			// to selectively show one of them.
+			$('div.content').hide();
+			
+			// If there's a hash in the URL,
+			// go to the relevant page.
+			if (window.location.hash) {
+				$('ul#menu a[href='+window.location.hash+']').click();
+				
+			// Otherwise, just pick the first one.
+			} else {
+				$('ul#menu a:first').click();
+			}
+			
+			// Make sure the hostname is right.
+			$('span.hostname').text(window.location.hostname);
+			
+			// Handle testrun.
+			$('input#testrun').click(function(){
+				var text = $('textarea#text').val();
+				$.post('/convert', {text:text}, function(data) {
+					$('textarea#text').val(data);
+				});
+			});
+			
+			// Handle preview.
+			$('input#preview').click(function(){
+				var text = $('textarea#text').val();
+				$('textarea#text, div#preview').toggle();
+				$('div#preview').html(text);
+			});
+		});
+		</script>
+	</body>
+</html>
