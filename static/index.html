@@ -126,6 +126,8 @@
 			
 			// Handle preview.
 			$('input#preview').click(function(){
+				var val = $(this).val();
+				$(this).val(val === 'Preview' ? 'Edit' : 'Preview');
 				var text = $('textarea#text').val();
 				$('textarea#text, div#preview').toggle();
 				$('div#preview').html(text);
