@@ -15,6 +15,7 @@ app.configure(function(){
 
 // Create a generic upload request handler.
 var converter = function(req, res) {
+	res.header("Access-Control-Allow-Origin", "*");
 	var isJson = (req.params.format);
 	var result = req.body.text;
 	
