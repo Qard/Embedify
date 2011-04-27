@@ -52,18 +52,6 @@ var flash = function (opt) {
 		s.codebase = 'http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=' + rv.join(',');
 	}
 	
-	// Use express install swf, if necessary.
-	if (s.express) {
-		for (var i in cv) {
-			if (parseInt(cv[i]) > parseInt(rv[i])) {
-				break;
-			}
-			if (parseInt(cv[i]) < parseInt(rv[i])) {
-				s.src = s.express;
-			}
-		}
-	}
-	
 	// Convert flashvars to query string.
 	if (s.flashvars) {
 		s.flashvars = unescape(query.stringify(s.flashvars));
@@ -84,7 +72,7 @@ var flash = function (opt) {
 		params += s[p[k]] ? param(n, s[p[k]]) : '';
 	};
 	
-	// Close and swap.
+	// Build Satay'd flash object code.
 	var o = '<!--[if IE]>'
 		+object
 		+attr('classid', s['classid'])

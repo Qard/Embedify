@@ -111,9 +111,7 @@ var video_filter = function(msg, regex, url, key){
 					
 	// Iterate our matches.
 	for (var i in matches) {
-		(function(){
-			var match = matches[i].replace(/^\s+|\s+$/g,"");
-			
+		(function(match){
 			// If a keyname has been supplied, we should use that.
 			if (key) {
 				// Grab id.
@@ -143,7 +141,7 @@ var video_filter = function(msg, regex, url, key){
 					, allowfullscreen: true
 				}));
 			}
-		})();
+		})(matches[i].replace(/^\s+|\s+$/g,""));
 	}
 	
 	// Return our filtered results.
