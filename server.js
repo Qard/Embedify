@@ -1,4 +1,7 @@
 #!/usr/local/bin/node
+
+// TODO: Make the video filters a little prettier.
+
 // Load required modules.
 var express = require('express');
 var flash = require('./flash').flash;
@@ -13,36 +16,56 @@ app.configure(function(){
 	app.use(express.bodyParser());
 });
 
-// Create a generic upload request handler.
-var converter = function(req, res) {
+// Create conversion request handler.
+app.post('/convert.:format?', function(req, res) {
+	// Allow all origins so the API works cross-domain.
 	res.header("Access-Control-Allow-Origin", "*");
+	
+	// Check if we are wanting JSON returned.
 	var isJson = (req.params.format);
+	
+	// Get text from request body.
 	var result = req.body.text;
 	
-	// Cycle through our filter list.
+	// Make sure result is a string.
+	if (typeof result !== 'string') {
+		result = result.toString();
+	}
+	
+	// Apply our filters in order.
 	for (var i in filters){
 		result = filters[i](result);
 	}
 	
-	res.send(isJson ? JSON.stringify({text: result}) : result);
-};
-
-app.put('/convert.:format?', converter);
-app.post('/convert.:format?', converter);
+	// Do some manipulations if the client expects JSON.
+	if (isJson) {
+		res.contentType('json');
+		result = JSON.stringify({text: result});
+	}
+	
+	// Set Content-Length.
+	res.header('Content-Length', result.length);
+	
+	// Reply with result data.
+	res.send(result);
+});
 
 // Start listening.
 app.listen(8124);
 
-
-
-
-
-
-
-
-
-
-
+// List of on* event types.
+var onevents = [
+	// Mouse events
+	'onclick', 'ondblclick', 'onmousedown', 'onmousemove', 'onmouseout', 'onmouseover', 'onmouseup'
+	// Keyboard events
+	, 'onkeydown', 'onkeypress', 'onkeyup'
+	// Image events
+	, 'onabort'
+	// Form events
+	, 'onblur', 'onchange', 'onfocus', 'onreset', 'onselect', 'onsubmit'
+	// Body events
+	, 'onload', 'onunload'
+];
 
 // Simple video service filter list. Intended to be added to.
 var vid_filters = {
@@ -130,24 +153,12 @@ var video_filter = function(msg, regex, url, key){
 var filters = [
 	// Handle script removal.
 	function(str){
-		return str.toString().replace(/<\s*script[^>]*>[\s\S]*?<\/script>/mig,'');
+		return str.replace(/<\s*script[^>]*>[\s\S]*?<\/script>/mig,'');
 	}
 	// Handle inline-script removal.
 	, function(str){
-		str = str.toString().replace(/<\s*[^>]*href="javascript:[^>]*"[^>]*>[\s\S]*?<\/[^>]*>/mig, '');
-		// List of event types.
-		var onevents = [
-			// Mouse events
-			'onclick', 'ondblclick', 'onmousedown', 'onmousemove', 'onmouseout', 'onmouseover', 'onmouseup'
-			// Keyboard events
-			, 'onkeydown', 'onkeypress', 'onkeyup'
-			// Image events
-			, 'onabort'
-			// Form events
-			, 'onblur', 'onchange', 'onfocus', 'onreset', 'onselect', 'onsubmit'
-			// Body events
-			, 'onload', 'onunload'
-		];
+		str = str.replace(/<\s*[^>]*href="javascript:[^>]*"[^>]*>[\s\S]*?<\/[^>]*>/mig, '');
+		
 		// Watch for all event types.
 		for (var i in onevents){
 			var reg = new RegExp('<\s*[^>]*'+onevents[i]+'="(javascript)?[^>]*"[^>]*>[\\s\\S]*?<\/[^>]*>', 'gim');
@@ -157,7 +168,7 @@ var filters = [
 	}
 	// Handle object/embed removal.
 	, function(str){
-		return str.toString().replace(/<\s*object[^>]*>[\s\S]*?<\/object>/mig,'').replace(/<\s*embed[^>]*>[\s\S]*?\/>/mig,'');
+		return str.replace(/<\s*object[^>]*>[\s\S]*?<\/object>/mig,'').replace(/<\s*embed[^>]*>[\s\S]*?\/>/mig,'');
 	}
 	// Escape HTML
 	/*, function(str){
@@ -180,31 +191,16 @@ var filters = [
 	, function(str){
 		str = str.replace(
 			/(^| )((ht|f)tps?:\/\/[\S]+?\.(mp4|ogg|webm)([\?&#]+[\S]?)?)($|(?![ ]))?/mig
-			, [
-				'<video width="600" height="350" controls preload="none">'
-				, '<source src="$2" type="video/$4" />'
-				, '</video>'
-			].join('')
+			, '<video width="600" height="350" controls preload="none"><source src="$2" type="video/$4" /></video>'
 		);
 		return str;
 	}
 	// Handle google maps replacements.
 	, function(str){
-		// TODO: Clean this up...It's pretty ugly.
-		var matches = str.match(/(^| )http(s)?:\/\/maps.google.com\/maps\?([\S]*)?(geocode|q)=(([^ ]+))?($|(?![ ]))?/g);
-		for (var i in matches) {
-			txt = $.trim(matches[i]);
-			if (txt) {
-				var reg_geocode = new RegExp("[\\?&(?:&amp;)]geocode=([^&#]*)");
-				var reg_q = new RegExp("[\\?&(?:&amp;)]q=([^&#]*)");
-				var parts_geocode = reg_geocode.exec(txt);
-				var parts_q = reg_q.exec(txt);
-				
-				if (parts_geocode || parts_q) {
-					str = str.replace(txt, '<iframe style="height:400px;border:none;width:600px;" src="http://maps.google.com/maps?q='+(parts_geocode[1] ? parts_geocode[1] : parts_q[1])+'&z=15&output=embed"></iframe>');
-				}
-			}
-		}
+		str = str.replace(
+			/(^| )(ht|f)tps?:\/\/maps.google.com\/maps\?([\S]*&)?(geocode|q)=([^&#]+)[\S]*($|(?![ ]))?/mig
+			, '<iframe style="height:400px;border:none;width:600px;" src="http://maps.google.com/maps?$4=$5&z=15&output=embed"></iframe>'
+		);
 		return str;
 	}
 	// Handle video service replacements.
@@ -242,7 +238,7 @@ var filters = [
 	}
 	// Add target="_blank" to all a elements.
 	, function(str){
-		str = str.replace(/<\s*(a)([^>]*)>/mig, '<$1 $2 target="_blank">');
+		str = str.replace(/(<a\s(?:(?!href=|target=|>).)*href="(?:(?!target=|>).)*)>/mig, '<a $1 target="_blank">');
 		return str;
 	}
 ];
