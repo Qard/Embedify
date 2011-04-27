@@ -83,6 +83,9 @@ html, body {
 				}
 			div#preview {
 				display:none;
+				background:#eef;
+				padding:5px;
+				margin-bottom:5px;
 				}
 			p.question {
 				font-weight:bold;
